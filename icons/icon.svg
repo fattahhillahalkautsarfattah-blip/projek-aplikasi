@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="50%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#991b1b"/>
+    </linearGradient>
+    <linearGradient id="bellGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#fef2f2"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#7f1d1d" flood-opacity="0.5"/>
+    </filter>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#ffffff" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- Background Squircle -->
+  <rect x="16" y="16" width="480" height="480" rx="110" ry="110" fill="url(#bgGrad)"/>
+  
+  <!-- Subtle Outer Border Ring -->
+  <rect x="24" y="24" width="464" height="464" rx="102" ry="102" fill="none" stroke="#fee2e2" stroke-width="6" stroke-opacity="0.35"/>
+
+  <!-- Bell Handle Top -->
+  <path d="M 230 130 C 230 110, 282 110, 282 130 Z" fill="none" stroke="#ffffff" stroke-width="20" stroke-linecap="round"/>
+
+  <!-- Bell Body with Shadow -->
+  <g filter="url(#shadow)">
+    <!-- Main Bell Shape -->
+    <path d="M 256 140 
+             C 195 140, 160 190, 155 285 
+             C 150 330, 120 355, 110 365 
+             C 105 370, 110 380, 120 380 
+             L 392 380 
+             C 402 380, 407 370, 402 365 
+             C 392 355, 362 330, 357 285 
+             C 352 190, 317 140, 256 140 Z" 
+          fill="url(#bellGrad)"/>
+    
+    <!-- Bell Clapper Ball -->
+    <circle cx="256" cy="405" r="32" fill="#ffffff" filter="url(#glow)"/>
+    <circle cx="256" cy="405" r="22" fill="#ef4444"/>
+
+    <!-- Reimu Shrine Ribbon / Accent on Bell -->
+    <path d="M 195 270 Q 256 295 317 270" fill="none" stroke="#ef4444" stroke-width="14" stroke-linecap="round"/>
+    
+    <!-- Sound Waves Left -->
+    <path d="M 85 220 A 40 40 0 0 0 85 300" fill="none" stroke="#ffffff" stroke-width="12" stroke-linecap="round" stroke-opacity="0.8"/>
+    <path d="M 60 190 A 75 75 0 0 0 60 330" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-opacity="0.5"/>
+
+    <!-- Sound Waves Right -->
+    <path d="M 427 220 A 40 40 0 0 1 427 300" fill="none" stroke="#ffffff" stroke-width="12" stroke-linecap="round" stroke-opacity="0.8"/>
+    <path d="M 452 190 A 75 75 0 0 1 452 330" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-opacity="0.5"/>
+  </g>
+
+  <!-- Anime Sparkles -->
+  <polygon points="370,110 376,125 391,131 376,137 370,152 364,137 349,131 364,125" fill="#fef08a"/>
+  <polygon points="135,140 139,150 149,154 139,158 135,168 131,158 121,154 131,150" fill="#fef08a"/>
+</svg>

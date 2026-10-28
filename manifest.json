@@ -1,0 +1,63 @@
+{
+  "name": "拔剑 Sketon - Anime Web Alarm",
+  "short_name": "Sketon Alarm",
+  "description": "Aplikasi alarm web anime Reimu modern dengan nada kustom MP3, auto-stop 30 menit, dan penyimpanan lokal IndexedDB.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#ef4444",
+  "background_color": "#0f172a",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/maskable-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Tambah Alarm Baru",
+      "short_name": "Tambah Alarm",
+      "description": "Buat jadwal alarm baru dengan cepat",
+      "url": "./index.html?action=add",
+      "icons": [
+        {
+          "src": "./icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Lihat Riwayat Alarm",
+      "short_name": "Riwayat",
+      "description": "Periksa catatan alarm yang berbunyi",
+      "url": "./index.html?action=history",
+      "icons": [
+        {
+          "src": "./icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拔剑 Sketon - Anime Web Alarm</title>
+
+    <!-- Progressive Web App (PWA) Manifest & Meta Tags -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#ef4444">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Sketon Alarm">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
+    <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+    <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="./icons/icon-512.png">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fef2f2',
+                            100: '#fee2e2',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f8fa;
+        }
+        .dark body {
+            background-color: #0f172a;
+            color: #f1f5f9;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+</head>
+<body class="text-gray-800 dark:text-gray-100 min-h-screen pb-16 transition-colors duration-200">
+
+    <!-- Top Navigation Bar -->
+    <nav class="fixed top-0 left-0 right-0 z-40 nav-blur border-b border-red-100 dark:border-red-900/30 shadow-xs transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-14">
+                <!-- Brand Identity -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                    <span class="w-3.5 h-3.5 rounded-full bg-red-500 inline-block animate-pulse shadow-sm shadow-red-500/50"></span>
+                    <span class="font-extrabold text-gray-800 dark:text-white text-lg tracking-wide">Sketon's Alarm</span>
+                    <span class="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded-full font-medium hidden sm:inline-block border border-red-200">Reimu Edition</span>
+                </div>
+                
+                <!-- Desktop Nav Links -->
+                <div class="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-600 dark:text-gray-300">
+                    <a href="#" class="flex items-center space-x-1.5 text-red-500 hover:text-red-600">
+                        <i class="fa-solid fa-clock"></i>
+                        <span>Alarm</span>
+                    </a>
+                    <a href="javascript:void(0)" id="btn-open-history" class="flex items-center space-x-1.5 hover:text-red-500 transition-colors">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span>Riwayat</span>
+                    </a>
+                    <a href="javascript:void(0)" onclick="document.getElementById('guide-modal').classList.remove('hidden'); document.getElementById('guide-modal').classList.add('flex')" class="flex items-center space-x-1.5 hover:text-red-500 transition-colors">
+                        <i class="fa-solid fa-circle-question"></i>
+                        <span>Panduan</span>
+                    </a>
+                </div>
+
+                <!-- Action Controls -->
+                <div class="flex items-center space-x-3 text-gray-500 dark:text-gray-400">
+                    <!-- PWA Install Button -->
+                    <button id="btn-pwa-install" class="hidden items-center space-x-1.5 px-3 py-1 rounded-full text-xs bg-red-500 hover:bg-red-600 text-white font-bold transition-all shadow-sm shadow-red-500/30 cursor-pointer animate-pulse" title="Pasang aplikasi di desktop atau ponsel Anda">
+                        <i class="fa-solid fa-download text-xs"></i>
+                        <span>Install App</span>
+                    </button>
+
+                    <!-- Audio Context Status Pill (FR Autoplay mitigation) -->
+                    <button id="audio-unlock-pill" class="flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100 transition-colors cursor-pointer" title="Klik untuk mengaktifkan izin audio browser">
+                        <i class="fa-solid fa-volume-high text-xs text-amber-500"></i>
+                        <span class="font-medium">Aktifkan Audio</span>
+                    </button>
+
+                    <!-- Request Notification Button (FR-14) -->
+                    <button id="btn-request-notif" class="p-2 hover:text-red-500 hover:bg-red-50 dark:hover:bg-gray-800 rounded-full transition-colors" title="Izin Notifikasi Desktop">
+                        <i class="fa-regular fa-bell text-base"></i>
+                    </button>
+
+                    <!-- Dark Mode Toggle -->
+                    <button id="btn-toggle-theme" class="p-2 hover:text-red-500 hover:bg-red-50 dark:hover:bg-gray-800 rounded-full transition-colors" title="Ubah Mode Gelap / Terang">
+                        <i class="fa-solid fa-moon text-base"></i>
+                    </button>
+
+                    <!-- Nav Mini Clock -->
+                    <div class="hidden sm:flex items-center pl-2 border-l border-gray-200 dark:border-gray-700 font-mono text-sm font-bold text-gray-700 dark:text-gray-300">
+                        <span id="nav-clock">--:--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Banner Header -->
+    <header class="hero-banner h-80 sm:h-96 w-full flex flex-col justify-center items-center text-white text-center relative px-4 pt-10">
+        <div class="relative z-10 space-y-3 max-w-3xl">
+            <div class="inline-flex items-center space-x-2 bg-black/40 backdrop-blur-md px-3.5 py-1 rounded-full text-xs text-red-200 border border-white/10">
+                <i class="fa-solid fa-shield-halved text-red-400"></i>
+                <span>Auto-Stop 30 Menit · Nada Kustom MP3 · IndexedDB Lokal</span>
+            </div>
+            <h1 class="text-3xl sm:text-5xl font-black tracking-wide drop-shadow-md">拔剑 Sketon · Web Alarm</h1>
+            <p class="text-xs sm:text-sm font-light text-red-100 tracking-wider">东方人的日常 · Smart Browser Alarm & Music Journal</p>
+            
+            <!-- Big Digital Live Clock & Date -->
+            <div class="pt-2">
+                <div id="hero-clock" class="text-5xl sm:text-7xl font-black tracking-tight font-mono text-white drop-shadow-lg">
+                    00:00:00
+                </div>
+                <div id="hero-date" class="text-xs sm:text-sm text-red-100 font-medium mt-1">
+                    Memuat tanggal...
+                </div>
+            </div>
+
+            <!-- Next Alarm Countdown Pill -->
+            <div class="pt-2">
+                <span id="next-alarm-countdown" class="inline-flex items-center space-x-2 bg-white/20 hover:bg-white/30 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-semibold text-white border border-white/20 transition-colors">
+                    <i class="fa-regular fa-clock text-amber-300"></i>
+                    <span>Memeriksa jadwal alarm berikutnya...</span>
+                </span>
+            </div>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-[#f7f8fa] dark:from-[#0f172a] to-transparent"></div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-14 relative z-20">
+        
+        <!-- Missed Alarms Banner (FR-13) -->
+        <div id="missed-alarms-banner" class="hidden mb-6 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-4">
+            <div class="flex items-center space-x-3 text-amber-800 dark:text-amber-200 text-sm">
+                <div class="w-10 h-10 rounded-xl bg-amber-200 dark:bg-amber-800/50 flex items-center justify-center flex-shrink-0 text-amber-700">
+                    <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-sm">Alarm Terlewat Terdeteksi</h4>
+                    <p id="missed-alarms-text" class="text-xs text-amber-700 dark:text-amber-300">Beberapa alarm terjadwal saat browser tertutup.</p>
+                </div>
+            </div>
+            <button id="btn-dismiss-missed-banner" class="text-amber-600 hover:text-amber-800 dark:hover:text-amber-100 text-xs font-semibold px-3 py-1.5 rounded-lg border border-amber-300 hover:bg-amber-100 transition-colors">
+                Tutup
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- LEFT SIDEBAR (3 Columns on Desktop) -->
+            <aside class="lg:col-span-4 xl:col-span-3 space-y-6">
+                
+                <!-- Music Player Mini Widget (DESIGN.md Style) -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-red-50 dark:border-gray-700 flex flex-col space-y-3 card-hover">
+                    <div class="flex items-center space-x-3">
+                        <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=200&auto=format&fit=crop" alt="Album Art" class="w-12 h-12 rounded-xl object-cover flex-shrink-0 border-2 border-red-100">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-xs font-bold text-gray-800 dark:text-white truncate">Reimu Shrine Chime</h4>
+                            <p class="text-[11px] text-gray-400 truncate">Pratinjau Suara Alarm</p>
+                            <!-- Mini Waveform Visualizer -->
+                            <div class="flex items-end space-x-1 h-3 mt-1.5">
+                                <span class="w-1 bg-red-400 rounded-full wave-bar-1"></span>
+                                <span class="w-1 bg-red-500 rounded-full wave-bar-2"></span>
+                                <span class="w-1 bg-red-300 rounded-full wave-bar-3"></span>
+                                <span class="w-1 bg-red-600 rounded-full wave-bar-4"></span>
+                                <span class="w-1 bg-red-400 rounded-full wave-bar-5"></span>
+                            </div>
+                        </div>
+                        <button id="sidebar-mini-play" class="w-9 h-9 rounded-full bg-red-50 dark:bg-red-950/40 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors cursor-pointer shadow-xs" title="Putar Contoh Nada">
+                            <i class="fa-solid fa-play text-xs ml-0.5"></i>
+                        </button>
+                    </div>
+
+                    <!-- Volume Slider -->
+                    <div class="pt-2 border-t border-gray-100 dark:border-gray-700 flex items-center space-x-2 text-xs text-gray-400">
+                        <i class="fa-solid fa-volume-low text-[10px]"></i>
+                        <input id="volume-slider" type="range" min="0" max="100" value="90" class="w-full h-1 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-500">
+                        <i class="fa-solid fa-volume-high text-[10px]"></i>
+                    </div>
+                </div>
+
+                <!-- Profile & Stats Card -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-red-50 dark:border-gray-700 text-center space-y-5 card-hover">
+                    <div class="relative inline-block">
+                        <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=300&auto=format&fit=crop" alt="Avatar" class="w-24 h-24 rounded-full mx-auto border-4 border-red-100 dark:border-red-900 shadow-md object-cover">
+                        <span class="absolute bottom-1 right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-gray-800 rounded-full" title="Sistem Alarm Aktif"></span>
+                    </div>
+
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-800 dark:text-white">D-Sketon</h2>
+                        <p class="text-xs text-gray-400 mt-0.5">Anime & Tech Productivity Journal</p>
+                    </div>
+
+                    <!-- Statistics Grid -->
+                    <div class="grid grid-cols-3 gap-2 py-3 border-y border-gray-100 dark:border-gray-700 text-center">
+                        <div>
+                            <span class="block text-xs text-gray-400">Total Alarm</span>
+                            <span id="stat-total-alarms" class="font-bold text-gray-700 dark:text-gray-200 text-base">0</span>
+                        </div>
+                        <div>
+                            <span class="block text-xs text-gray-400">Aktif</span>
+                            <span id="stat-active-alarms" class="font-bold text-red-500 text-base">0</span>
+                        </div>
+                        <div>
+                            <span class="block text-xs text-gray-400">Riwayat</span>
+                            <span id="stat-total-history" class="font-bold text-gray-700 dark:text-gray-200 text-base">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Action Navigation Buttons -->
+                    <div class="space-y-2 pt-1">
+                        <button id="btn-add-alarm" class="w-full py-2.5 px-4 rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center space-x-2 shadow-md shadow-red-500/20 cursor-pointer">
+                            <i class="fa-solid fa-plus text-xs"></i>
+                            <span>Tambah Alarm Baru</span>
+                        </button>
+                        <!-- PWA Sidebar Install Button -->
+                        <button id="btn-sidebar-install" class="hidden w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-bold text-sm transition-all duration-200 items-center justify-center space-x-2 shadow-md shadow-red-500/25 cursor-pointer">
+                            <i class="fa-solid fa-download text-xs"></i>
+                            <span>Pasang Aplikasi (PWA)</span>
+                        </button>
+                        <button onclick="document.getElementById('btn-open-history').click()" class="w-full py-2.5 px-4 rounded-xl red-outline-btn font-medium text-sm flex items-center justify-center space-x-2 cursor-pointer">
+                            <i class="fa-solid fa-clock-rotate-left text-xs"></i>
+                            <span>Lihat Riwayat Alarm</span>
+                        </button>
+                        <button onclick="document.getElementById('guide-modal').classList.remove('hidden'); document.getElementById('guide-modal').classList.add('flex')" class="w-full py-2.5 px-4 rounded-xl red-outline-btn font-medium text-sm flex items-center justify-center space-x-2 cursor-pointer">
+                            <i class="fa-solid fa-shield-halved text-xs"></i>
+                            <span>Aturan Auto-Stop 30m</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Info Card: Feature Badges -->
+                <div class="bg-gradient-to-br from-red-50 to-white dark:from-gray-800 dark:to-gray-800 rounded-2xl p-5 border border-red-100 dark:border-gray-700 text-xs space-y-3">
+                    <h4 class="font-bold text-red-600 dark:text-red-400 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Keunggulan Alarm Ini:</span>
+                    </h4>
+                    <ul class="space-y-2 text-gray-600 dark:text-gray-300">
+                        <li class="flex items-start space-x-2">
+                            <i class="fa-solid fa-check text-red-500 mt-0.5"></i>
+                            <span><strong>PWA & Mode Offline:</strong> Dapat diinstal di desktop/HP dan tetap berjalan lancar tanpa koneksi internet.</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa-solid fa-check text-red-500 mt-0.5"></i>
+                            <span><strong>Pemberhentian Otomatis 30 Menit:</strong> Mencegah nada berdering terus bila ditinggal.</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa-solid fa-check text-red-500 mt-0.5"></i>
+                            <span><strong>Unggah MP3 Favorit:</strong> Disimpan aman di IndexedDB perangkat tanpa server.</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <i class="fa-solid fa-check text-red-500 mt-0.5"></i>
+                            <span><strong>Web Worker Background:</strong> Akurasi timer tetap presisi walau tab berada di latar belakang.</span>
+                        </li>
+                    </ul>
+                </div>
+
+            </aside>
+
+            <!-- RIGHT CONTENT AREA (8-9 Columns on Desktop) -->
+            <section class="lg:col-span-8 xl:col-span-9 space-y-6">
+
+                <!-- Featured Summary Banner Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Feature Card 1 -->
+                    <div class="relative h-40 rounded-2xl overflow-hidden shadow-sm card-hover cursor-pointer group" onclick="document.getElementById('btn-add-alarm').click()">
+                        <img src="https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent flex flex-col justify-end p-5 text-white">
+                            <div class="flex items-center space-x-2 text-xs text-red-300">
+                                <i class="fa-solid fa-bell"></i>
+                                <span>Pintasan Jadwal</span>
+                            </div>
+                            <h3 class="text-xl font-bold tracking-wide mt-1">+ Buat Alarm Baru</h3>
+                            <p class="text-xs text-red-100 font-light mt-0.5">Pilih jam, hari berulang, dan nada MP3 favorit Anda</p>
+                        </div>
+                    </div>
+
+                    <!-- Feature Card 2 -->
+                    <div class="relative h-40 rounded-2xl overflow-hidden shadow-sm card-hover cursor-pointer group" onclick="document.getElementById('btn-open-history').click()">
+                        <img src="https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent flex flex-col justify-end p-5 text-white">
+                            <div class="flex items-center space-x-2 text-xs text-red-300">
+                                <i class="fa-solid fa-file-waveform"></i>
+                                <span>Riwayat Aktivitas</span>
+                            </div>
+                            <h3 class="text-xl font-bold tracking-wide mt-1">Riwayat & Log Bunyi</h3>
+                            <p class="text-xs text-red-100 font-light mt-0.5">Lihat alarm yang dimatikan, ditunda, atau auto-stop</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Header & Filter Toolbar -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 shadow-sm border border-red-50 dark:border-gray-700 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                    <!-- Title & Filter Tabs -->
+                    <div class="flex items-center space-x-2 flex-wrap gap-y-2">
+                        <div class="flex items-center space-x-2 text-red-500 font-bold text-sm mr-2">
+                            <i class="fa-solid fa-thumbtack"></i>
+                            <span>Daftar Alarm</span>
+                        </div>
+                        <div class="inline-flex rounded-xl bg-gray-100 dark:bg-gray-700/60 p-1 text-xs font-semibold">
+                            <button class="px-3 py-1.5 rounded-lg bg-red-500 text-white transition-all cursor-pointer" data-filter="all">Semua</button>
+                            <button class="px-3 py-1.5 rounded-lg bg-white dark:bg-transparent text-gray-600 dark:text-gray-300 hover:text-red-500 transition-all cursor-pointer" data-filter="active">Aktif</button>
+                            <button class="px-3 py-1.5 rounded-lg bg-white dark:bg-transparent text-gray-600 dark:text-gray-300 hover:text-red-500 transition-all cursor-pointer" data-filter="inactive">Nonaktif</button>
+                        </div>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="relative flex-1 max-w-xs">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                        <input id="search-input" type="text" placeholder="Cari alarm (label, jam)..." class="w-full pl-9 pr-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-xs focus:outline-none focus:border-red-400 dark:focus:border-red-500 transition-colors">
+                    </div>
+                </div>
+
+                <!-- Alarm Cards List Container -->
+                <div id="alarms-list-container" class="space-y-4">
+                    <!-- Alarm cards will be injected here dynamically -->
+                </div>
+
+                <!-- Empty State (Shown when no alarms) -->
+                <div id="alarms-empty-state" class="hidden bg-white dark:bg-gray-800 rounded-2xl p-10 text-center border border-dashed border-red-200 dark:border-gray-700 space-y-4">
+                    <div class="w-16 h-16 rounded-full bg-red-50 dark:bg-red-950/40 text-red-500 flex items-center justify-center mx-auto text-2xl">
+                        <i class="fa-regular fa-bell-slash"></i>
+                    </div>
+                    <div class="max-w-md mx-auto space-y-1">
+                        <h3 class="font-bold text-gray-800 dark:text-white text-base">Belum Ada Alarm Terjadwal</h3>
+                        <p class="text-xs text-gray-400">Tambahkan alarm pertama Anda untuk bangun pagi atau pengingat sesi kerja dengan nada MP3 pilihan.</p>
+                    </div>
+                    <button onclick="document.getElementById('btn-add-alarm').click()" class="py-2.5 px-6 rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold text-xs transition-colors shadow-sm cursor-pointer">
+                        <i class="fa-solid fa-plus mr-1.5"></i>
+                        <span>Tambah Alarm Sekarang</span>
+                    </button>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <!-- Floating Action Button (FAB) on Mobile -->
+    <button id="fab-add-alarm" class="lg:hidden fixed bottom-6 right-6 z-30 w-14 h-14 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-xl shadow-red-500/40 text-xl transition-all cursor-pointer">
+        <i class="fa-solid fa-plus"></i>
+    </button>
+
+    <!-- Footer -->
+    <footer class="mt-16 text-center text-xs text-gray-400 space-y-2">
+        <p>© 2026 D-Sketon. Powered by Hexo & Theme Reimu inspired layout.</p>
+        <p class="flex items-center justify-center space-x-1">
+            <span>Dibuat dengan</span>
+            <i class="fa-solid fa-heart text-red-500"></i>
+            <span>Tailwind CSS & IndexedDB Lokal</span>
+        </p>
+    </footer>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- 1. Form Modal: Tambah / Ubah Alarm (FR-02, FR-03, FR-04, FR-05) -->
+    <div id="alarm-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-red-100 dark:border-gray-700 space-y-5 transition-all">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-700">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-8 h-8 rounded-full bg-red-50 dark:bg-red-950/40 text-red-500 flex items-center justify-center">
+                        <i class="fa-solid fa-clock text-sm"></i>
+                    </div>
+                    <h3 id="modal-title" class="font-extrabold text-gray-800 dark:text-white text-lg">Tambah Alarm Baru</h3>
+                </div>
+                <button id="btn-close-modal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-2 rounded-full cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Form Content -->
+            <form id="alarm-form" class="space-y-4">
+                <!-- Time Input -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                        WAKTU ALARM (24 JAM) <span class="text-red-500">*</span>
+                    </label>
+                    <input id="alarm-time" type="time" required class="w-full text-3xl font-mono font-bold text-center py-3 px-4 rounded-2xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-white focus:outline-none focus:border-red-500 transition-colors">
+                    
+                    <!-- Quick offset helpers -->
+                    <div class="flex items-center justify-center space-x-2 pt-2 text-xs">
+                        <span class="text-gray-400 text-[11px]">Set cepat:</span>
+                        <button type="button" data-time-offset="5" class="px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-red-50 hover:text-red-600 text-gray-600 dark:text-gray-300 transition-colors">+5m</button>
+                        <button type="button" data-time-offset="15" class="px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-red-50 hover:text-red-600 text-gray-600 dark:text-gray-300 transition-colors">+15m</button>
+                        <button type="button" data-time-offset="30" class="px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-red-50 hover:text-red-600 text-gray-600 dark:text-gray-300 transition-colors">+30m</button>
+                        <button type="button" data-time-offset="60" class="px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-red-50 hover:text-red-600 text-gray-600 dark:text-gray-300 transition-colors">+1j</button>
+                    </div>
+                </div>
+
+                <!-- Label / Catatan -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                        LABEL / NAMA ALARM
+                    </label>
+                    <input id="alarm-label" type="text" placeholder="Misal: Bangun Pagi, Sesi Coding, Minum Obat..." class="w-full py-2.5 px-4 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-xs text-gray-800 dark:text-white focus:outline-none focus:border-red-500 transition-colors">
+                </div>
+
+                <!-- Repeating Days -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                            PENGULANGAN HARI
+                        </label>
+                        <div class="space-x-1 text-[11px]">
+                            <button type="button" id="btn-days-all" class="text-red-500 hover:underline">Semua</button>
+                            <span class="text-gray-300">·</span>
+                            <button type="button" id="btn-days-work" class="text-red-500 hover:underline">Kerja</button>
+                            <span class="text-gray-300">·</span>
+                            <button type="button" id="btn-days-once" class="text-red-500 hover:underline">Sekali Saja</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1.5 text-center">
+                        <button type="button" data-day="1" class="day-toggle-btn py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer">Sen</button>
+                        <button type="button" data-day="2" class="day-toggle-btn py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer">Sel</button>
+                        <button type="button" data-day="3" class="day-toggle-btn py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer">Rab</button>
+                        <button type="button" data-day="4" class="day-toggle-btn py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer">Kam</button>
+                        <button type="button" data-day="5" class="day-toggle-btn py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer">Jum</button>
+                        <button type="button" data-day="6" class="day-toggle-btn py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer">Sab</button>
+                        <button type="button" data-day="0" class="day-toggle-btn py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer">Min</button>
+                    </div>
+                    <p class="text-[11px] text-gray-400 mt-1">Kosongkan semua tombol hari jika alarm hanya untuk sekali berbunyi.</p>
+                </div>
+
+                <!-- Nada Dering (MP3 Upload & Presets) -->
+                <div class="space-y-2 pt-1 border-t border-gray-100 dark:border-gray-700">
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                        PILIHAN NADA SUARA
+                    </label>
+
+                    <div class="flex items-center space-x-2">
+                        <select id="alarm-preset-sound" class="flex-1 py-2 px-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-xs text-gray-800 dark:text-white focus:outline-none focus:border-red-500">
+                            <option value="reimu_chime">🔔 Reimu Shrine Chime (Melodic)</option>
+                            <option value="digital_beep">⚡ Digital Cyber Beep (High Alert)</option>
+                            <option value="morning_bell">🌅 Morning Sunlight (Soft Chord)</option>
+                            <option value="custom">🎵 File MP3 Kustom Sendiri</option>
+                        </select>
+                        <!-- Preview Sound Button (FR-05) -->
+                        <button type="button" id="btn-preview-form-sound" data-playing="false" class="py-2 px-3.5 rounded-xl red-outline-btn text-xs font-semibold flex items-center justify-center cursor-pointer">
+                            <i class="fa-solid fa-play mr-1.5"></i>
+                            <span>Tes Nada</span>
+                        </button>
+                    </div>
+
+                    <!-- MP3 File Upload Area (FR-04) -->
+                    <div id="sound-drop-zone" class="border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-2xl p-4 text-center cursor-pointer hover:border-red-400 transition-colors">
+                        <input type="file" id="alarm-sound-file" accept=".mp3,audio/mpeg,audio/*" class="hidden">
+                        <label for="alarm-sound-file" class="cursor-pointer space-y-1 block">
+                            <i class="fa-solid fa-cloud-arrow-up text-red-500 text-xl"></i>
+                            <div class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                Klik untuk memilih atau seret file MP3 ke sini
+                            </div>
+                            <div class="text-[10px] text-gray-400">
+                                Format: audio/mpeg (.mp3), Maksimal 10 MB (Disimpan di IndexedDB)
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Sound file info badge -->
+                    <div id="sound-file-info" class="hidden flex items-center justify-between p-2.5 bg-red-50 dark:bg-red-950/40 border border-red-100 rounded-xl text-xs">
+                        <div class="flex items-center space-x-2 min-w-0">
+                            <i class="fa-solid fa-music text-red-500"></i>
+                            <span id="sound-file-name" class="font-medium text-gray-800 dark:text-gray-200 truncate">audio.mp3</span>
+                            <span id="sound-file-size" class="text-gray-400 text-[10px] flex-shrink-0">1.2 MB</span>
+                        </div>
+                        <span class="text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">Terpilih</span>
+                    </div>
+                    <div id="sound-file-error" class="text-xs text-rose-500 font-medium"></div>
+                </div>
+
+                <!-- Snooze Duration (FR-09) -->
+                <div class="pt-1">
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                        DURASI TUNDA (SNOOZE)
+                    </label>
+                    <select id="alarm-snooze" class="w-full py-2.5 px-3 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-xs text-gray-800 dark:text-white focus:outline-none focus:border-red-500">
+                        <option value="1">1 Menit (Untuk uji cepat)</option>
+                        <option value="3">3 Menit</option>
+                        <option value="5" selected>5 Menit (Standar)</option>
+                        <option value="10">10 Menit</option>
+                        <option value="15">15 Menit</option>
+                    </select>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <button type="button" id="btn-cancel-modal" class="py-2.5 px-5 rounded-xl border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium text-xs transition-colors cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="submit" class="py-2.5 px-6 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-xs transition-colors shadow-md shadow-red-500/20 cursor-pointer">
+                        Simpan Alarm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. Ringing Overlay (Modal Layar Penuh) (FR-06, FR-07, FR-08, FR-09) -->
+    <div id="ringing-overlay" class="fixed inset-0 z-50 bg-gradient-to-br from-red-900 via-rose-950 to-black text-white hidden flex-col items-center justify-between p-6 sm:p-10 transition-all duration-300">
+        
+        <!-- Top Info Header -->
+        <div class="w-full max-w-lg flex items-center justify-between">
+            <div class="inline-flex items-center space-x-2 bg-red-800/60 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs text-red-200 border border-red-500/30">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-400 animate-ping"></span>
+                <span>ALARM SEDANG BERBUNYI</span>
+            </div>
+            <!-- Queue indicator (FR-11) -->
+            <span id="ringing-queue-badge" class="hidden text-xs bg-amber-500/30 border border-amber-400/40 text-amber-200 px-3 py-1 rounded-full">
+                Alarm antrean
+            </span>
+        </div>
+
+        <!-- Center Stage: Big Clock & Bell Animation -->
+        <div class="text-center space-y-6 my-auto">
+            <!-- Pulsing Bell Icon -->
+            <div class="relative inline-block">
+                <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-red-600/30 ringing-ring flex items-center justify-center mx-auto border-2 border-red-500/50">
+                    <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-red-500 flex items-center justify-center shadow-2xl shadow-red-500/80">
+                        <i class="fa-solid fa-bell text-3xl sm:text-4xl text-white bell-ringing"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Big Time Display -->
+            <div class="space-y-1">
+                <div id="ringing-time" class="text-6xl sm:text-8xl font-black font-mono tracking-tight text-white drop-shadow-2xl">
+                    00:00
+                </div>
+                <h2 id="ringing-label" class="text-xl sm:text-2xl font-bold text-red-200 tracking-wide">
+                    Waktunya Bangun!
+                </h2>
+            </div>
+
+            <!-- Auto-stop 30 Minutes Live Countdown (FR-07) -->
+            <div class="inline-flex items-center space-x-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-2xl border border-red-500/30 text-xs sm:text-sm text-red-200 font-mono">
+                <i class="fa-regular fa-hourglass-half text-amber-400"></i>
+                <span id="ringing-countdown">Berhenti otomatis dalam: 30:00</span>
+            </div>
+            <p class="text-[11px] text-red-300/70 max-w-xs mx-auto">
+                Sesuai aturan FR-07, alarm akan berhenti bersuara sendiri bila tidak dimatikan dalam 30 menit.
+            </p>
+        </div>
+
+        <!-- Bottom Action Buttons (FR-08, FR-09) -->
+        <div class="w-full max-w-md space-y-3 pb-4">
+            <!-- Big Primary Dismiss Button -->
+            <button id="btn-dismiss-ringing" class="w-full py-4 px-6 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-extrabold text-lg sm:text-xl transition-transform active:scale-95 shadow-xl shadow-red-500/50 flex items-center justify-center space-x-2 cursor-pointer">
+                <i class="fa-solid fa-bell-slash text-base"></i>
+                <span>MATIKAN ALARM</span>
+            </button>
+
+            <!-- Snooze Button -->
+            <button id="btn-snooze-ringing" class="w-full py-3 px-6 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold text-sm sm:text-base border border-white/20 transition-all cursor-pointer flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-bed text-sm"></i>
+                <span>TUNDA (SNOOZE 5 MENIT)</span>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- 3. History Modal (FR-01, FR-07, FR-08, FR-09, FR-13) -->
+    <div id="history-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-red-100 dark:border-gray-700 space-y-4 max-h-[85vh] flex flex-col">
+            <!-- Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-8 h-8 rounded-full bg-red-50 dark:bg-red-950/40 text-red-500 flex items-center justify-center">
+                        <i class="fa-solid fa-clock-rotate-left text-sm"></i>
+                    </div>
+                    <h3 class="font-extrabold text-gray-800 dark:text-white text-lg">Riwayat Bunyi Alarm</h3>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button id="btn-clear-history" class="text-xs text-rose-500 hover:text-rose-700 p-1.5 rounded-lg border border-rose-100 hover:bg-rose-50 transition-colors">
+                        Bersihkan
+                    </button>
+                    <button id="btn-close-history" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1.5 rounded-full">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- List Container -->
+            <div id="history-list-container" class="space-y-2 overflow-y-auto pr-1 flex-1">
+                <!-- History items injected here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="history-empty-state" class="hidden text-center py-10 text-gray-400 text-xs">
+                <i class="fa-solid fa-inbox text-3xl mb-2 text-gray-300"></i>
+                <p>Belum ada riwayat alarm berbunyi.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Guide / Help Modal -->
+    <div id="guide-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-red-100 dark:border-gray-700 space-y-4 max-h-[85vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-700">
+                <h3 class="font-bold text-gray-800 dark:text-white text-lg flex items-center space-x-2">
+                    <i class="fa-solid fa-circle-question text-red-500"></i>
+                    <span>Panduan Aplikasi Alarm Web</span>
+                </h3>
+                <button onclick="document.getElementById('guide-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 p-1.5">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <div class="text-xs text-gray-600 dark:text-gray-300 space-y-3 leading-relaxed">
+                <div class="p-3 bg-red-50 dark:bg-red-950/30 rounded-xl border border-red-100 dark:border-red-900/40">
+                    <h5 class="font-bold text-red-600 dark:text-red-400 mb-1">⏱️ Aturan Auto-Stop 30 Menit (FR-07)</h5>
+                    <p>Setiap alarm yang berbunyi akan memutar audio secara loop dan mengaktifkan timer otomatis 30 menit. Jika Anda tidak mematikan alarm (misal tidak ada di ruangan), alarm akan otomatis berhenti sendiri tepat pada menit ke-30 dan statusnya dicatat sebagai <em>"berhenti otomatis"</em> di riwayat.</p>
+                </div>
+
+                <div class="p-3 bg-gray-50 dark:bg-gray-700/40 rounded-xl border border-gray-100 dark:border-gray-700">
+                    <h5 class="font-bold text-gray-800 dark:text-white mb-1">🎵 Nada MP3 Kustom (FR-04)</h5>
+                    <p>Anda dapat mengunggah file lagu atau nada MP3 sendiri hingga ukuran 10 MB per alarm. File disimpan secara aman di memori browser lokal (IndexedDB) dan tidak dikirim ke internet.</p>
+                </div>
+
+                <div class="p-3 bg-gray-50 dark:bg-gray-700/40 rounded-xl border border-gray-100 dark:border-gray-700">
+                    <h5 class="font-bold text-gray-800 dark:text-white mb-1">⚡ Tab Latar Belakang & Izin Notifikasi</h5>
+                    <p>Agar alarm berbunyi tanpa kendala, biarkan tab ini tetap terbuka di browser. Tekan tombol <strong>"Aktifkan Audio"</strong> dan izinkan notifikasi desktop agar peringatan tetap muncul walau Anda sedang membuka aplikasi lain.</p>
+                </div>
+            </div>
+
+            <div class="pt-2 text-right">
+                <button onclick="document.getElementById('guide-modal').classList.add('hidden')" class="py-2 px-5 rounded-xl bg-red-500 text-white font-bold text-xs hover:bg-red-600 transition-colors">
+                    Mengerti
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-5 left-5 z-50 flex flex-col space-y-2 max-w-sm w-full pointer-events-none *:pointer-events-auto"></div>
+
+    <!-- Application Script Loader: Supports both ES Modules (http/https) and Standalone Bundle (file:// direct open) -->
+    <script>
+        if (window.location.protocol === 'file:') {
+            // Running directly from file system (double-click in Explorer)
+            const script = document.createElement('script');
+            script.src = './js/bundle.js';
+            document.body.appendChild(script);
+        } else {
+            // Running via HTTP server
+            const script = document.createElement('script');
+            script.type = 'module';
+            script.src = './js/app.js';
+            document.body.appendChild(script);
+        }
+    </script>
+
+</body>
+</html>
